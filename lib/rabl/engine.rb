@@ -34,7 +34,10 @@ module Rabl
         instance_eval(@_source) if @_source.present?
       end
       instance_exec(@_data_object, &block) if block_given?
-      cache_results { self.send("to_" + @_options[:format].to_s) }
+
+      # pass rabl/format related options
+      format_options = locals.slice(:root, :child_root)
+      cache_results { self.send("to_" + @_options[:format].to_s, format_options) }
     end
 
     # Returns a hash representation of the data object

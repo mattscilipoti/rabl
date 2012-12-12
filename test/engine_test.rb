@@ -611,4 +611,36 @@ context "Rabl::Engine" do
       Rabl.reset_configuration!
     end
   end
+
+  context "can override defaults" do
+    setup do
+      Rabl.configure do |config|
+        config.include_json_root     = true
+        config.include_xml_root      = false
+        config.enable_json_callbacks = false
+      end
+    end
+
+    asserts "that we can override default :include_json_root via :locals" do
+      template = rabl %q{
+          object @user
+      }
+      scope = Object.new
+      scope.instance_variable_set :@user, User.new
+      template.render(scope, :root => false)
+    end.equals "{}"
+
+    asserts "that we can override default :include_child_root via :locals" do
+      template = rabl %{
+          child @users
+      }
+      scope = Object.new
+      scope.instance_variable_set :@users, [User.new, User.new]
+      template.render(scope, :child_root => false)
+    end.equals "{\"users\":[{},{}]}"
+
+    teardown do
+      Rabl.reset_configuration!
+    end
+  end
 end
